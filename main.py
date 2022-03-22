@@ -1,3 +1,4 @@
+from logging.config import dictConfig
 import pygame
 import sys
 import components.components as components
@@ -19,7 +20,7 @@ def create_screen():
 
 create_screen()
 
-# object instances
+# ball and paddle instances
 p1_paddle = components.Paddle(
     screen,
     config.blue,
@@ -29,7 +30,7 @@ p1_paddle = components.Paddle(
     20 * config.line_weight,
 )
 
-optional_paddle = components.Paddle(
+second_paddle = components.Paddle(
     screen,
     config.red,
     10,
@@ -45,7 +46,7 @@ ball = components.Ball(
     config.height // 2,
     config.line_weight * 2,
     p1_paddle,
-    optional_paddle,
+    second_paddle,
 )
 
 game_setup = components.GameSetupTitles(screen)
@@ -58,7 +59,7 @@ multi_player_mode = False
 # settings
 difficulty = None
 
-# ask for game setup before playing
+# game setup before playing
 while not playing:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -67,6 +68,9 @@ while not playing:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 sys.exit()
+            if event.key == pygame.K_m:
+                multi_player_mode = True
+                game_setup.difficulty()
             if event.key == pygame.K_RETURN:
                 game_setup.difficulty()
             if event.key == pygame.K_1:
@@ -78,20 +82,26 @@ while not playing:
             if event.key == pygame.K_3:
                 difficulty = "hard"
                 playing = True
-            if event.key == pygame.K_m:
-                multi_player_mode = True
-                game_setup.instructions()
+            
     pygame.display.flip()
     clock.tick(120)
 
-# setup second paddle to be AI or human
-if not multi_player_mode:
-    p2_paddle = components.AiPaddleController(optional_paddle, ball, screen)
+# setup second paddle to be AI or human and set paddle difficulty
+if not multi_player_mode: 
+   
+    p2_paddle = components.AiPaddleController(second_paddle, ball, screen)
     p2_paddle.set_difficulty(difficulty)
 
-else:
-    p2_paddle = optional_paddle
 
+else:
+    p2_paddle = second_paddle
+    p2_paddle.set_difficulty(difficulty)
+
+
+# set ball difficulty
+ball.set_difficulty(difficulty)
+
+#scores and title instances
 score = components.ScoreBoard(screen, p1_paddle, p2_paddle)
 titles = components.Titles(screen, p1_paddle, p2_paddle)
 
@@ -133,4 +143,4 @@ while running:
     playing = titles.win()
 
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(120)
