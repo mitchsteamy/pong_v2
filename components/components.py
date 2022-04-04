@@ -141,7 +141,7 @@ class ScoreBoard:
         self.screen.blit(self.score_1, ((config.width // 2) + 28, config.height // 20))
 
     def score(self):
-        if (self.ball.x_pos + self.ball.x_vel < self.p2_paddle.x_pos + self.p2_paddle.width) and (self.p2_paddle.y_pos < self.ball.y_pos + self.ball.y_vel + self.ball.rad < self.p2_paddle.y_pos + self.p2_paddle.height + self.ball.rad):
+        if (self.ball.x_pos + self.ball.x_vel < self.p2_paddle.x_pos + self.p2_paddle.width) and (self.p2_paddle.y_pos < self.ball.y_pos + self.ball.y_vel < self.p2_paddle.y_pos + self.p2_paddle.height + self.ball.rad):
             self.ball.x_vel = -self.ball.x_vel
             self.ball.y_vel = (self.p2_paddle.y_pos + self.p2_paddle.height / 2 - self.ball.y_pos )/15 #test
             self.ball.y_vel = -self.ball.y_vel
@@ -151,7 +151,7 @@ class ScoreBoard:
             self.ball.y_pos = config.height / 2
             self.ball.x_vel = self.ball.x_vel
             self.ball.y_vel = 0
-        if (self.ball.x_pos + self.ball.x_vel > self.p1_paddle.x_pos) and (self.p1_paddle.y_pos < self.ball.y_pos + self.ball.y_vel + self.ball.rad < self.p1_paddle.y_pos + self.p1_paddle.height +self.ball.rad):
+        if (self.ball.x_pos + self.ball.x_vel > self.p1_paddle.x_pos) and (self.p1_paddle.y_pos < self.ball.y_pos + self.ball.y_vel  < self.p1_paddle.y_pos + self.p1_paddle.height + self.ball.rad):
             self.ball.x_vel = -self.ball.x_vel
             self.ball.y_vel = (self.p1_paddle.y_pos + self.p1_paddle.height / 2 - self.ball.y_pos )/ 15 #test
             self.ball.y_vel = -self.ball.y_vel
