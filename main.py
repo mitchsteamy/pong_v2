@@ -123,8 +123,6 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 sys.exit()
-            if event.key == pygame.K_SPACE:
-                titles = components.Titles(screen, p1_paddle, p2_paddle)
             if event.key == pygame.K_w:
                 p2_paddle.state = "up"
             if event.key == pygame.K_s:
