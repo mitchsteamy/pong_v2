@@ -17,11 +17,6 @@ pygame.display.set_caption("PONG by Mitch Embry")
 def create_screen():
     screen.fill(config.black)
 
-def reset_score():
-        if playing == False:
-            p1_paddle.score = 0
-            p2_paddle.score = 0 
-
 create_screen()
 
 # ball and paddle instances
