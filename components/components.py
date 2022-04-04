@@ -5,16 +5,14 @@ from .config import config
 # TODO: scoreboard for AI dude is broken
 
 class Ball:
-    def __init__(self, screen, color, x_pos, y_pos, rad, p1_paddle, p2_paddle):
+    def __init__(self, screen, color, x_pos, y_pos, rad):
         self.screen = screen
         self.color = color
         self.x_pos = x_pos
         self.y_pos = y_pos
-        self.x_vel = -5
+        self.x_vel = 5
         self.y_vel = 0
         self.rad = rad
-        self.p1_paddle = p1_paddle
-        self.p2_paddle = p2_paddle
 
     def draw(self):
         pygame.draw.circle(self.screen, self.color, (self.x_pos, self.y_pos), self.rad)
@@ -24,56 +22,36 @@ class Ball:
         self.y_pos += self.y_vel
 
     def bounce(self):
-        if (self.x_pos + self.x_vel < self.p2_paddle.x_pos + self.p2_paddle.width) and (
-            self.p2_paddle.y_pos
-            < self.y_pos + self.y_vel + self.rad
-            < self.p2_paddle.y_pos + self.p2_paddle.height + self.rad
-        ):
-            self.x_vel = -self.x_vel
-            self.y_vel = (
-                self.p2_paddle.y_pos + self.p2_paddle.height / 2 - self.y_pos
-            ) / 15  # test
-            self.y_vel = -self.y_vel
-        elif self.x_pos + self.x_vel < 0:
-            self.p1_paddle.score += 1
-            self.x_pos = config.width / 2
-            self.y_pos = config.height / 2
-            self.x_vel = self.x_vel
-            self.y_vel = 0
-        if (self.x_pos + self.x_vel > self.p1_paddle.x_pos - self.p1_paddle.width) and (
-            self.p1_paddle.y_pos
-            < self.y_pos + self.y_vel + self.rad
-            < self.p1_paddle.y_pos + self.p1_paddle.height + self.rad
-        ):
-            self.x_vel = -self.x_vel
-            self.y_vel = (
-                self.p1_paddle.y_pos + self.p1_paddle.height / 2 - self.y_pos
-            ) / 15
-            self.y_vel = -self.y_vel
-        elif self.x_pos + self.x_vel > config.width:
-            self.p2_paddle.score += 1
-            self.x_pos = config.width / 2
-            self.y_pos = config.height / 2
-            self.x_vel = -self.x_vel
-            self.y_vel = 0
         if self.y_pos + self.y_vel > config.height or self.y_pos + self.y_vel < 0:
             self.y_vel = -self.y_vel
 
-    def set_x_vel(self, speed: int):
-        self.x_vel = speed
+    def set_x_vel(self, new_x_vel: int):
+        self.x_vel = new_x_vel
+    
+    def set_difficulty(self, difficulty):
+        self.difficulty = difficulty
+        if difficulty == "easy":
+            self.set_x_vel(4)
+        elif difficulty == "hard":
+            self.set_x_vel(7)
+        else:
+            self.set_x_vel(5)
+
 
 
 class Paddle:
-    def __init__(self, screen, color, x_pos, y_pos, width, height):
+    def __init__(self, screen, color, x_pos, y_pos, width, height, ball):
         self.screen = screen
         self.color = color
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.width = width
         self.height = height
-        self.speed = -5
+        self.ball = ball
+        self.speed = - 5
         self.score = 0
         self.state = "idle"
+        self.difficulty = "medium"
 
     def draw(self):
         pygame.draw.rect(
@@ -94,28 +72,23 @@ class Paddle:
     def set_speed(self, speed: int):
         self.speed = speed
 
-
-class AiPaddleController(Paddle):
-    def __init__(self, paddle, ball, screen):
-        self.score = 0
-        self.speed = -4
-        self.difficulty = "medium"  # TODO: use int enum settings
-        self.paddle = paddle
-        self.ball = ball
-        self.screen = screen
-
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
         if difficulty == "easy":
-            self.paddle.set_speed(-1)
-            self.ball.set_x_vel(-3)
+            self.set_speed(-3)
         elif difficulty == "hard":
-            self.paddle.set_speed(-8)
-            self.ball.set_x_vel(-8)
+            self.set_speed(-6)
         else:
-            self.paddle.set_speed(-4)
-            self.ball.set_x_vel(-4)
+            self.set_speed(-4)
+    
 
+
+
+class AiPaddleController(Paddle):
+    def __init__(self, paddle):
+        self.paddle = paddle
+        super().__init__(paddle.screen, paddle.color, paddle.x_pos, paddle.y_pos, paddle.width, paddle.height, paddle.ball)
+    
     def draw(self):
         pygame.draw.rect(
             self.screen, self.paddle.color, (self.paddle.x_pos, self.paddle.y_pos, self.paddle.width, self.paddle.height)
@@ -142,11 +115,12 @@ class AiPaddleController(Paddle):
 
 
 class ScoreBoard:
-    def __init__(self, screen, p1_paddle, p2_paddle):
+    def __init__(self, screen, paddle_1, paddle_2, ball):
         self.game_font = pygame.font.SysFont("Ubuntu", 50)
         self.screen = screen
-        self.p1_paddle = p1_paddle
-        self.p2_paddle = p2_paddle
+        self.p1_paddle = paddle_1
+        self.p2_paddle = paddle_2
+        self.ball = ball
 
     def draw(self):
         pygame.draw.line(
@@ -167,6 +141,28 @@ class ScoreBoard:
         self.screen.blit(self.score_2, ((config.width // 2) - 60, config.height // 20))
         self.screen.blit(self.score_1, ((config.width // 2) + 28, config.height // 20))
 
+    def score(self):
+        if (self.ball.x_pos + self.ball.x_vel < self.p2_paddle.x_pos + self.p2_paddle.width) and (self.p2_paddle.y_pos < self.ball.y_pos + self.ball.y_vel + self.ball.rad < self.p2_paddle.y_pos + self.p2_paddle.height + self.ball.rad):
+            self.ball.x_vel = -self.ball.x_vel
+            self.ball.y_vel = (self.p2_paddle.y_pos + self.p2_paddle.height / 2 - self.ball.y_pos )/15 #test
+            self.ball.y_vel = -self.ball.y_vel
+        elif self.ball.x_pos + self.ball.x_vel < 0:
+            self.p1_paddle.score += 1
+            self.ball.x_pos = config.width / 2
+            self.ball.y_pos = config.height / 2
+            self.ball.x_vel = self.ball.x_vel
+            self.ball.y_vel = 0
+        if (self.ball.x_pos + self.ball.x_vel > self.p1_paddle.x_pos) and (self.p1_paddle.y_pos < self.ball.y_pos + self.ball.y_vel + self.ball.rad < self.p1_paddle.y_pos + self.p1_paddle.height +self.ball.rad):
+            self.ball.x_vel = -self.ball.x_vel
+            self.ball.y_vel = (self.p1_paddle.y_pos + self.p1_paddle.height / 2 - self.ball.y_pos )/ 15 #test
+            self.ball.y_vel = -self.ball.y_vel
+        elif self.ball.x_pos + self.ball.x_vel > config.width:
+            self.p2_paddle.score += 1
+            self.ball.x_pos = config.width / 2
+            self.ball.y_pos = config.height / 2
+            self.ball.x_vel = - self.ball.x_vel
+            self.ball.y_vel = 0
+        
 
 class GameSetupTitles:
     def __init__(self, screen):
@@ -212,13 +208,13 @@ class GameSetupTitles:
 
 
 class Titles:
-    def __init__(self, screen, p1_paddle, p2_paddle):
+    def __init__(self, screen, paddle_1, paddle_2):
         self.screen = screen
         self.game_font = pygame.font.SysFont("Ubuntu", 40)
         self.game_font_med = pygame.font.SysFont("Ubuntu", 30)
         self.game_font_small = pygame.font.SysFont("Ubuntu", 20)
-        self.p1_paddle = p1_paddle
-        self.p2_paddle = p2_paddle
+        self.paddle_1 = paddle_1
+        self.paddle_2 = paddle_2
 
     def win(self):
         self.p1_win = self.game_font.render(
@@ -232,29 +228,32 @@ class Titles:
             False,
             config.white,
         )
-        if self.p1_paddle.score >= 10:
+        
+        if self.paddle_1.score >= 3:
+            playing = False
+            
             self.screen.fill(config.black)
             self.screen.blit(self.p1_win, (config.width // 4, config.height // 2 - 85))
-            self.screen.blit(
-                self.play_again, (config.width // 6, config.height // 2 - 40)
-            )
+            self.screen.blit(self.play_again, (config.width // 6, config.height // 2 - 40))
             
-            self.p1_paddle.y_pos = config.height // 2 - self.p1_paddle.height // 2
-            self.p2_paddle.y_pos = config.height // 2 - self.p1_paddle.height // 2
-            playing = False
-            return playing
+            self.paddle_1.y_pos = config.height // 2 - self.paddle_1.height // 2
+            self.paddle_2.y_pos = config.height // 2 - self.paddle_2.height // 2
+            
+            return playing 
 
-        elif self.p2_paddle.score >= 10:
+        elif self.paddle_2.score >= 3:
+            playing = False
+
             self.screen.fill(config.black)
             self.screen.blit(self.p2_win, (config.width // 4, config.height // 2 - 85))
-            self.screen.blit(
-                self.play_again, (config.width // 6, config.height // 2 - 40)
-            )
-            self.p1_paddle.y_pos = config.height // 2 - self.p1_paddle.height // 2
-            self.p2_paddle.y_pos = config.height // 2 - self.p1_paddle.height // 2
-            playing = False
+            self.screen.blit(self.play_again, (config.width // 6, config.height // 2 - 40))
+
+            self.paddle_1.y_pos = config.height // 2 - self.paddle_1.height // 2
+            self.paddle_2.y_pos = config.height // 2 - self.paddle_2.height // 2
+            
             return playing
 
         else:
+
             playing = True
             return playing
