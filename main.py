@@ -106,10 +106,6 @@ else:
 # set ball difficulty
 ball.set_difficulty(difficulty)
 
-# set score to zero
-reset_score()
-
-
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
