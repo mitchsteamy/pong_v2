@@ -1,8 +1,7 @@
 import pygame
 from .config import config
 
-# TODO: difficulty is broken
-# TODO: scoreboard for AI dude is broken
+# TODO create play again feature
 
 class Ball:
     def __init__(self, screen, color, x_pos, y_pos, rad):
