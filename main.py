@@ -1,8 +1,7 @@
-from logging.config import dictConfig
 import pygame
 import sys
 import components.components as components
-from components.config import config
+from components.config import config, flags
 
 
 # pygame instance
@@ -55,94 +54,113 @@ game_setup = components.GameSetupTitles(screen)
 score = components.ScoreBoard(screen, p1_paddle, p2_paddle, ball)
 titles = components.Titles(screen, p1_paddle, p2_paddle)
 
-# main function
-running = True
-playing = False
-multi_player_mode = False
-
-
-# settings
-difficulty = None
-
 # game setup
-while not playing:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
+def game_setup_loop():
+    while not flags.playing:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
                 sys.exit()
-            if event.key == pygame.K_m:
-                multi_player_mode = True
-                game_setup.difficulty()
-            if event.key == pygame.K_RETURN:
-                game_setup.difficulty()
-            if event.key == pygame.K_1:
-                difficulty = "easy"
-                playing = True
-            if event.key == pygame.K_2:
-                difficulty = 'medium'
-                playing = True
-            if event.key == pygame.K_3:
-                difficulty = "hard"
-                playing = True
-        
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    sys.exit()
+                if event.key == pygame.K_m:
+                    flags.multiplayer = True
+                    game_setup.difficulty()
+                if event.key == pygame.K_RETURN:
+                    game_setup.difficulty()
+                if event.key == pygame.K_1:
+                    flags.difficulty = "easy"
+                    flags.playing = True
+                if event.key == pygame.K_2:
+                    flags.difficulty = 'medium'
+                    flags.playing = True
+                if event.key == pygame.K_3:
+                    flags.difficulty = "hard"
+                    flags.playing = True
             
-    pygame.display.flip()
-    clock.tick(120)
+                
+        pygame.display.flip()
+        clock.tick(120)
 
-# setup second paddle to be AI or human and set paddle difficulty
-if not multi_player_mode: 
-   
-    p2_paddle = components.AiPaddleController(p2_paddle)
-    p2_paddle.set_difficulty(difficulty)
-
-
-else:
-    p2_paddle = p2_paddle
+    # setup second paddle to be AI or human and set paddle difficulty
+    if not flags.multiplayer: 
+        global p2_paddle
+        p2_paddle = components.AiPaddleController(p2_paddle)
+        p2_paddle.set_difficulty(flags.difficulty)
 
 
-# set ball difficulty
-ball.set_difficulty(difficulty)
+    else:
+        p2_paddle = p2_paddle
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
+
+    # set ball difficulty
+    ball.set_difficulty(flags.difficulty)
+
+def game_play_loop():
+    while flags.playing:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
                 sys.exit()
-            if event.key == pygame.K_w:
-                p2_paddle.state = "up"
-            if event.key == pygame.K_s:
-                p2_paddle.state = "down"
-            if event.key == pygame.K_UP:
-                p1_paddle.state = "up"
-            if event.key == pygame.K_DOWN:
-                p1_paddle.state = "down"
-        if event.type == pygame.KEYUP:
-            p1_paddle.state = "idle"
-            p2_paddle.state = "idle"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    sys.exit()
+                if event.key == pygame.K_w:
+                    p2_paddle.state = "up"
+                if event.key == pygame.K_s:
+                    p2_paddle.state = "down"
+                if event.key == pygame.K_UP:
+                    p1_paddle.state = "up"
+                if event.key == pygame.K_DOWN:
+                    p1_paddle.state = "down"
+            if event.type == pygame.KEYUP:
+                p1_paddle.state = "idle"
+                p2_paddle.state = "idle"
 
-    create_screen()
+        create_screen()
 
-    ball.draw()
-    ball.bounce()
-    ball.move()
+        ball.draw()
+        ball.bounce()
+        ball.move()
+        
+        p1_paddle.draw()
+        p1_paddle.move()
+
+        p2_paddle.draw()
+        p2_paddle.move()
+
+        score.score()
+        score.draw()
+        flags.game_over = titles.win()
     
-    p1_paddle.draw()
-    p1_paddle.move()
+        pygame.display.flip()
+        clock.tick(120)
 
-    p2_paddle.draw()
-    p2_paddle.move()
+def reset_flags():
+    flags.running=True,
+    flags.playing=False,
+    flags.multiplayer=False,
+    flags.game_over=False,
+    flags.difficulty=None,
 
-    score.score()
-    score.draw()
-    playing  = titles.win()
-    first_game = titles.win()
-    
-   
-    pygame.display.flip()
-    clock.tick(120)
+
+def game_over_loop():
+    while flags.game_over():
+        for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        sys.exit()
+                    if event.key == pygame.K_SPACE:
+                        reset_flags()
+
+def main_loop():
+    while flags.running:  
+        game_setup_loop()
+        game_play_loop()
+        game_over_loop()
+
+main_loop()
