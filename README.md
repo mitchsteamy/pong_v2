@@ -1,4 +1,7 @@
-Code after speding some time rewriting stuff on google hangouts call.
+Code after speding some time rewriting stuff based on feedback given during google hangouts call.
+
+fixed difficulty bug
+fixed score board bug
 
 # TODO: feature request: be able to restart game
 
