@@ -11,7 +11,6 @@ class PongConfig:
     width: int
     line_weight: int
 
-
 config = PongConfig(
     white=(255, 255, 255),
     black=(0, 0, 0),
@@ -20,4 +19,20 @@ config = PongConfig(
     height=800,
     width=1000,
     line_weight=5,
+)
+
+@dataclass
+class PongFlags:
+    running: bool
+    playing: bool
+    multiplayer: bool
+    game_over: bool
+    difficulty: str
+
+flags = PongFlags(
+    running=True,
+    playing=False,
+    multiplayer=False,
+    game_over=False,
+    difficulty=None,
 )
