@@ -1,5 +1,5 @@
 import pygame
-from .config import config
+from .config import config, flags
 
 # TODO create play again feature
 
@@ -229,7 +229,7 @@ class Titles:
         )
         
         if self.paddle_1.score >= 3:
-            playing = False
+            game_over = True
             
             self.screen.fill(config.black)
             self.screen.blit(self.p1_win, (config.width // 4, config.height // 2 - 85))
@@ -238,10 +238,10 @@ class Titles:
             self.paddle_1.y_pos = config.height // 2 - self.paddle_1.height // 2
             self.paddle_2.y_pos = config.height // 2 - self.paddle_2.height // 2
             
-            return playing 
+            return game_over
 
         elif self.paddle_2.score >= 3:
-            playing = False
+            game_over = True
 
             self.screen.fill(config.black)
             self.screen.blit(self.p2_win, (config.width // 4, config.height // 2 - 85))
@@ -250,7 +250,7 @@ class Titles:
             self.paddle_1.y_pos = config.height // 2 - self.paddle_1.height // 2
             self.paddle_2.y_pos = config.height // 2 - self.paddle_2.height // 2
             
-            return playing
+            return game_over
 
         else:
 
