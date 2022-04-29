@@ -85,7 +85,7 @@ def game_setup_loop():
 
     # setup second paddle to be AI or human and set paddle difficulty
     if not flags.multiplayer: 
-        global p2_paddle
+        global p2_paddle  # not sure how to get rid of this global variable
         p2_paddle = components.AiPaddleController(p2_paddle)
         p2_paddle.set_difficulty(flags.difficulty)
 
