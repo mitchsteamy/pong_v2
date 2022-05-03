@@ -170,24 +170,6 @@ class GameSetupTitles:
         self.game_font_med = pygame.font.SysFont("Ubuntu", 30)
         self.game_font_small = pygame.font.SysFont("Ubuntu", 20)
 
-        self.intro()
-
-    def intro(self):
-        self.screen.fill(config.black)
-        self.intro_text = self.game_font_med.render(
-            f"Press M for Multiplayer Mode. Press ENTER for Singleplayer.",
-            False,
-            config.white,
-        )
-        self.screen.blit(self.intro_text, (config.width // 25, config.height // 2 - 70))
-
-    def difficulty(self):
-        self.screen.fill(config.black)
-        self.difficulty_text = self.game_font_med.render(
-            f"Press 1 for Easy, 2 for Medium, or 3 for Hard.", False, config.white
-        )
-        self.screen.blit(self.difficulty_text, (config.width // 7, config.height // 2 - 70))
-
     def instructions(self):
         self.screen.fill(config.black)
         self.instruction_1 = self.game_font_med.render(
@@ -214,6 +196,25 @@ class Titles:
         self.game_font_small = pygame.font.SysFont("Ubuntu", 20)
         self.paddle_1 = paddle_1
         self.paddle_2 = paddle_2
+
+        self.intro()
+
+    def intro(self):
+        self.screen.fill(config.black)
+        self.intro_text = self.game_font_med.render(
+            f"Press M for Multiplayer Mode. Press ENTER for Singleplayer.",
+            False,
+            config.white,
+        )
+        self.screen.blit(self.intro_text, (config.width // 25, config.height // 2 - 70))
+
+    def difficulty(self):
+        self.screen.fill(config.black)
+        self.difficulty_text = self.game_font_med.render(
+            f"Press 1 for Easy, 2 for Medium, or 3 for Hard.", False, config.white
+        )
+        self.screen.blit(self.difficulty_text, (config.width // 7, config.height // 2 - 70))
+
 
     def win(self):
         self.p1_win = self.game_font.render(
@@ -256,4 +257,5 @@ class Titles:
 
             game_over = False
             return game_over
+
 
