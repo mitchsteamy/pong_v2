@@ -174,19 +174,19 @@ class GameSetupTitles:
 
     def intro(self):
         self.screen.fill(config.black)
-        self.intro = self.game_font_med.render(
+        self.intro_text = self.game_font_med.render(
             f"Press M for Multiplayer Mode. Press ENTER for Singleplayer.",
             False,
             config.white,
         )
-        self.screen.blit(self.intro, (config.width // 25, config.height // 2 - 70))
+        self.screen.blit(self.intro_text, (config.width // 25, config.height // 2 - 70))
 
     def difficulty(self):
         self.screen.fill(config.black)
-        self.difficulty = self.game_font_med.render(
+        self.difficulty_text = self.game_font_med.render(
             f"Press 1 for Easy, 2 for Medium, or 3 for Hard.", False, config.white
         )
-        self.screen.blit(self.difficulty, (config.width // 7, config.height // 2 - 70))
+        self.screen.blit(self.difficulty_text, (config.width // 7, config.height // 2 - 70))
 
     def instructions(self):
         self.screen.fill(config.black)
@@ -254,5 +254,6 @@ class Titles:
 
         else:
 
-            playing = True
-            return playing
+            game_over = False
+            return game_over
+
