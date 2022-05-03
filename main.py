@@ -77,15 +77,14 @@ def game_setup_loop():
                     flags.playing = True
                 if event.key == pygame.K_3:
                     flags.difficulty = "hard"
-                    flags.playing = True
-            
+                    flags.playing = True       
                 
         pygame.display.flip()
         clock.tick(120)
 
     # setup second paddle to be AI or human and set paddle difficulty
     if not flags.multiplayer: 
-        global p2_paddle  # not sure how to get rid of this global variable
+        global p2_paddle
         p2_paddle = components.AiPaddleController(p2_paddle)
         p2_paddle.set_difficulty(flags.difficulty)
 
@@ -98,7 +97,7 @@ def game_setup_loop():
     ball.set_difficulty(flags.difficulty)
 
 def game_play_loop():
-    while flags.playing:
+    while not flags.game_over:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -146,7 +145,7 @@ def reset_flags():
 
 
 def game_over_loop():
-    while flags.game_over():
+    while flags.game_over:
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -155,7 +154,13 @@ def game_over_loop():
                     if event.key == pygame.K_ESCAPE:
                         sys.exit()
                     if event.key == pygame.K_SPACE:
+                        create_screen()
+                        game_setup.intro()
                         reset_flags()
+
+        pygame.display.flip()
+        clock.tick(120)
+
 
 def main_loop():
     while flags.running:  
