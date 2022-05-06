@@ -1,5 +1,5 @@
 import pygame
-from .config import config, flags
+from .config import config
 
 # TODO create play again feature
 
@@ -141,7 +141,7 @@ class ScoreBoard:
         self.screen.blit(self.score_1, ((config.width // 2) + 28, config.height // 20))
 
     def score(self):
-        if (self.ball.x_pos + self.ball.x_vel < self.p2_paddle.x_pos + self.p2_paddle.width) and (self.p2_paddle.y_pos < self.ball.y_pos + self.ball.y_vel < self.p2_paddle.y_pos + self.p2_paddle.height + self.ball.rad):
+        if (self.ball.x_pos + self.ball.x_vel < self.p2_paddle.x_pos + self.p2_paddle.width) and (self.p2_paddle.y_pos + self.p2_paddle.speed < self.ball.y_pos + self.ball.y_vel < self.p2_paddle.y_pos + self.p2_paddle.height + self.p2_paddle.speed):
             self.ball.x_vel = -self.ball.x_vel
             self.ball.y_vel = (self.p2_paddle.y_pos + self.p2_paddle.height / 2 - self.ball.y_pos )/15 #test
             self.ball.y_vel = -self.ball.y_vel
@@ -151,7 +151,7 @@ class ScoreBoard:
             self.ball.y_pos = config.height / 2
             self.ball.x_vel = self.ball.x_vel
             self.ball.y_vel = 0
-        if (self.ball.x_pos + self.ball.x_vel > self.p1_paddle.x_pos) and (self.p1_paddle.y_pos < self.ball.y_pos + self.ball.y_vel  < self.p1_paddle.y_pos + self.p1_paddle.height + self.ball.rad):
+        if (self.ball.x_pos + self.ball.x_vel > self.p1_paddle.x_pos) and (self.p1_paddle.y_pos + self.p1_paddle.speed < self.ball.y_pos + self.ball.y_vel  < self.p1_paddle.y_pos + self.p1_paddle.height + self.p1_paddle.speed):
             self.ball.x_vel = -self.ball.x_vel
             self.ball.y_vel = (self.p1_paddle.y_pos + self.p1_paddle.height / 2 - self.ball.y_pos )/ 15 #test
             self.ball.y_vel = -self.ball.y_vel
@@ -163,7 +163,7 @@ class ScoreBoard:
             self.ball.y_vel = 0
         
 
-class GameSetupTitles:
+class GameSetup:
     def __init__(self, screen):
         self.screen = screen
         self.game_font = pygame.font.SysFont("Ubuntu", 40)
@@ -207,14 +207,13 @@ class Titles:
             config.white,
         )
         self.screen.blit(self.intro_text, (config.width // 25, config.height // 2 - 70))
-
+    
     def difficulty(self):
         self.screen.fill(config.black)
         self.difficulty_text = self.game_font_med.render(
             f"Press 1 for Easy, 2 for Medium, or 3 for Hard.", False, config.white
         )
         self.screen.blit(self.difficulty_text, (config.width // 7, config.height // 2 - 70))
-
 
     def win(self):
         self.p1_win = self.game_font.render(
@@ -257,5 +256,4 @@ class Titles:
 
             game_over = False
             return game_over
-
 
