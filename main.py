@@ -7,18 +7,15 @@ from components.config import config, flags
 # pygame instance
 pygame.init()
 pygame.display.set_caption("PONG by Mitch Embry")
+
+#create game clock
 clock = pygame.time.Clock()
+
 # create screen
 screen = pygame.display.set_mode((config.width, config.height))
-pygame.display.set_caption("PONG by Mitch Embry")
 
 
-def create_screen():
-    screen.fill(config.black)
-
-create_screen()
-
-# ball and paddle instances
+# Instatiation of objects
 ball = components.Ball(
     screen,
     config.white,
@@ -47,23 +44,71 @@ p2_paddle = components.Paddle(
     ball
 )
 
-
-
-#scores and title instances
-#game_setup = components.GameSetupTitles(screen)
 score = components.ScoreBoard(screen, p1_paddle, p2_paddle, ball)
 titles = components.Titles(screen, p1_paddle, p2_paddle)
 
-def reset_flags():
+def create_screen():
+    screen.fill(config.black)
+
+create_screen()
+
+
+def reset_game(p1_paddle, p2_paddle, ball, titles, score):
+    player_1 = p1_paddle
+    player_2 = p2_paddle
+    game_ball = ball
+    game_score = score
+    game_titles = titles
+
+
     flags.playing = False
     flags.multiplayer = False
     flags.game_over = False
     flags.difficulty = None
-    score.p1_paddle.score = 0
-    score.p2_paddle.score = 0 
+    player_1.score = 0
+    player_2.score = 0
+
+    del game_ball
+    game_ball = components.Ball(
+        screen,
+        config.white,
+        config.width // 2,
+        config.height // 2,
+        config.line_weight * 2,
+        )
+
+    del player_1
+    player_1 = components.Paddle(
+        screen,
+        config.blue,
+        (config.width - 20),
+        (config.height // 2 - 10 * config.line_weight),
+        2 * config.line_weight,
+        20 * config.line_weight,
+        ball
+    )
+
+    del player_2
+    player_2 = components.Paddle(
+        screen,
+        config.red,
+        10,
+        (config.height // 2 - 10 * config.line_weight),
+        2 * config.line_weight,
+        20 * config.line_weight,
+        ball
+    ) 
+    del game_score
+    game_score = components.ScoreBoard(screen, p1_paddle, p2_paddle, ball)
+    
+    del game_titles
+    game_titles = components.Titles(screen, p1_paddle, p2_paddle)
 
 # game setup
-def game_setup_loop():
+def game_setup_loop(titles):
+    game_titles = titles
+
+    game_titles.intro()
     while flags.setup_mode:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -74,10 +119,10 @@ def game_setup_loop():
                     sys.exit()
                 if event.key == pygame.K_m:
                     flags.multiplayer = True
-                    titles.difficulty()
+                    game_titles.difficulty()
                 if event.key == pygame.K_RETURN:
                     flags.multiplayer = False
-                    titles.difficulty()
+                    game_titles.difficulty()
                 if event.key == pygame.K_1:
                     flags.difficulty = "easy"
                     flags.playing = True
@@ -94,29 +139,31 @@ def game_setup_loop():
         pygame.display.flip()
         clock.tick(120)
 
-    # setup second paddle to be AI or human and set paddle difficulty
-def set_multiplayer_difficulty():
-    if not flags.multiplayer: 
-        global p2_paddle
-        p2_paddle = components.AiPaddleController(p2_paddle)
-        p2_paddle.set_difficulty(flags.difficulty)
+def game_play_loop(screen, p1_paddle, p2_paddle, ball, titles, score):
+    game_screen = screen
+    player_1 = p1_paddle
+    player_2 = p2_paddle
+    game_ball = ball
+    game_titles = titles
+    game_score = score
 
-
+    if not flags.multiplayer:
+        player_2 = components.AiPaddleController(player_2)
+        player_2.set_difficulty(flags.difficulty)
+    
     else:
-        p2_paddle = components.Paddle(
-            screen,
-            config.red,
-            10,
-            (config.height // 2 - 10 * config.line_weight),
-            2 * config.line_weight,
-            20 * config.line_weight,
-            ball)
-
+        player_2 = player_2
 
     # set ball difficulty
-    ball.set_difficulty(flags.difficulty)
+ 
+    game_ball.set_difficulty(flags.difficulty)
 
-def game_play_loop():
+    # create scoreboard
+    del game_score
+    game_score = components.ScoreBoard(game_screen, player_1, player_2, game_ball)
+    del game_titles
+    game_titles = components.Titles(game_screen, player_1, player_2)
+    
     while flags.playing:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -126,38 +173,40 @@ def game_play_loop():
                 if event.key == pygame.K_ESCAPE:
                     sys.exit()
                 if event.key == pygame.K_w:
-                    p2_paddle.state = "up"
+                    player_2.state = "up"
                 if event.key == pygame.K_s:
-                    p2_paddle.state = "down"
+                    player_2.state = "down"
                 if event.key == pygame.K_UP:
-                    p1_paddle.state = "up"
+                    player_1.state = "up"
                 if event.key == pygame.K_DOWN:
-                    p1_paddle.state = "down"
+                    player_1.state = "down"
             if event.type == pygame.KEYUP:
-                p1_paddle.state = "idle"
-                p2_paddle.state = "idle"
+                player_1.state = "idle"
+                player_2.state = "idle"
 
         create_screen()
 
-        ball.draw()
-        ball.bounce()
-        ball.move()
+        game_ball.draw()
+        game_ball.bounce()
+        game_ball.move()
         
-        p1_paddle.draw()
-        p1_paddle.move()
+        player_1.draw()
+        player_1.move()
 
-        p2_paddle.draw()
-        p2_paddle.move()
+        player_2.draw()
+        player_2.move()
 
-        score.score()
-        score.draw()
-        flags.game_over = titles.win()
-        flags.playing = not titles.win()
+        game_score.draw()
+        game_score.score()
+
+        flags.game_over = game_titles.win()
+        flags.playing = not game_titles.win()
     
         pygame.display.flip()
         clock.tick(120)
 
-def game_over_loop():
+def game_over_loop(titles):
+    game_titles = titles
     while flags.game_over:
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -168,7 +217,7 @@ def game_over_loop():
                         sys.exit()
                     if event.key == pygame.K_SPACE:
                         create_screen()
-                        titles.intro()
+                        game_titles.intro()
                         flags.setup_mode = True
                         flags.game_over = False
 
@@ -179,10 +228,9 @@ def game_over_loop():
 
 def main_loop():
     while flags.running:  
-        game_setup_loop()
-        set_multiplayer_difficulty()
-        game_play_loop()
-        game_over_loop()
-        reset_flags()
+        game_setup_loop(titles)
+        game_play_loop(screen, p1_paddle, p2_paddle, ball, titles, score)
+        game_over_loop(titles)
+        reset_game(p1_paddle, p2_paddle, ball, titles, score)
 
 main_loop()
