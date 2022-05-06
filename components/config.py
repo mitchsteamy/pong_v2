@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+import components.components as components\
 
 @dataclass
 class PongConfig:
