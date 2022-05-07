@@ -141,9 +141,9 @@ class ScoreBoard:
         self.screen.blit(self.score_1, ((config.width // 2) + 28, config.height // 20))
 
     def score(self):
-        if (self.ball.x_pos + self.ball.x_vel < self.paddle_2.x_pos + self.paddle_2.width) and (self.paddle_2.y_pos + self.paddle_2.speed < self.ball.y_pos + self.ball.y_vel < self.paddle_2.y_pos + self.paddle_2.height + self.paddle_2.speed):
+        if (self.ball.x_pos + self.ball.x_vel < self.paddle_2.x_pos + self.paddle_2.width) and (self.paddle_2.y_pos + self.paddle_2.speed < self.ball.y_pos + self.ball.rad + self.ball.y_vel < self.paddle_2.y_pos + self.paddle_2.height + self.paddle_2.speed + self.ball.rad):
             self.ball.x_vel = -self.ball.x_vel
-            self.ball.y_vel = (self.paddle_2.y_pos + self.paddle_2.height / 2 - self.ball.y_pos )/ 10 #test
+            self.ball.y_vel = (self.paddle_2.y_pos + self.paddle_2.height / 2 - self.ball.y_pos )/ 14 #test
             self.ball.y_vel = -self.ball.y_vel
         elif self.ball.x_pos + self.ball.x_vel < 0:
             self.paddle_1.score += 1
@@ -151,9 +151,9 @@ class ScoreBoard:
             self.ball.y_pos = config.height / 2
             self.ball.x_vel = self.ball.x_vel
             self.ball.y_vel = 0
-        if (self.ball.x_pos + self.ball.x_vel > self.paddle_1.x_pos) and (self.paddle_1.y_pos + self.paddle_1.speed < self.ball.y_pos + self.ball.y_vel  < self.paddle_1.y_pos + self.paddle_1.height + self.paddle_1.speed):
+        if (self.ball.x_pos + self.ball.x_vel > self.paddle_1.x_pos) and (self.paddle_1.y_pos + self.paddle_1.speed < self.ball.y_pos + self.ball.rad + self.ball.y_vel  < self.paddle_1.y_pos + self.paddle_1.height + self.paddle_1.speed + self.ball.rad):
             self.ball.x_vel = -self.ball.x_vel
-            self.ball.y_vel = (self.paddle_1.y_pos + self.paddle_1.height / 2 - self.ball.y_pos )/ 10 #test
+            self.ball.y_vel = (self.paddle_1.y_pos + self.paddle_1.height / 2 - self.ball.y_pos )/ 13 #test
             self.ball.y_vel = -self.ball.y_vel
         elif self.ball.x_pos + self.ball.x_vel > config.width:
             self.paddle_2.score += 1
