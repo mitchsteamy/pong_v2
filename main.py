@@ -44,6 +44,8 @@ p2_paddle = components.Paddle(
     ball
 )
 
+ai_paddle = components.AiPaddleController(p2_paddle)
+
 score = components.ScoreBoard(screen, p1_paddle, p2_paddle, ball)
 titles = components.Titles(screen, p1_paddle, p2_paddle)
 
@@ -54,8 +56,9 @@ create_screen()
 
 # game setup
 def game_setup_loop(titles):
-    game_titles = titles
-    game_titles.intro()
+
+    setup_titles = titles
+    setup_titles.intro()
 
     while flags.setup_mode:
         for event in pygame.event.get():
@@ -67,10 +70,10 @@ def game_setup_loop(titles):
                     sys.exit()
                 if event.key == pygame.K_m:
                     flags.multiplayer = True
-                    game_titles.input_difficulty()
+                    setup_titles.input_difficulty()
                 if event.key == pygame.K_RETURN:
                     flags.multiplayer = False
-                    game_titles.input_difficulty()
+                    setup_titles.input_difficulty()
                 if event.key == pygame.K_1:
                     flags.difficulty = "easy"
                     flags.playing = True
@@ -87,32 +90,31 @@ def game_setup_loop(titles):
         pygame.display.flip()
         clock.tick(120)
 
-def game_play_loop(screen, p1_paddle, p2_paddle, ball, titles, score):
+
+def game_play_loop(screen, p1_paddle, p2_paddle, ai_paddle, ball, titles, score):
+
     game_screen = screen
-    player_1 = p1_paddle
-    player_2 = p2_paddle
+    game_p1 = p1_paddle
     game_ball = ball
     game_titles = titles
     game_score = score
 
     if not flags.multiplayer:
-        player_2 = components.AiPaddleController(player_2)
-        player_2.set_difficulty(flags.difficulty)
+        game_p2 = ai_paddle
+        game_p2.set_difficulty(flags.difficulty)
     
     else:
-        player_2 = player_2
+        game_p2 = p2_paddle
 
     # set ball difficulty
  
     game_ball.set_difficulty(flags.difficulty)
 
     #reset titles
-    del game_titles
-    game_titles = components.Titles(game_screen, player_1, player_2)
+    game_titles = titles
     
     # create scoreboard
-    del game_score
-    game_score = components.ScoreBoard(game_screen, player_1, player_2, game_ball)
+    game_score = score
     
     while flags.playing:
         for event in pygame.event.get():
@@ -123,16 +125,16 @@ def game_play_loop(screen, p1_paddle, p2_paddle, ball, titles, score):
                 if event.key == pygame.K_ESCAPE:
                     sys.exit()
                 if event.key == pygame.K_w:
-                    player_2.state = "up"
+                    game_p2.state = "up"
                 if event.key == pygame.K_s:
-                    player_2.state = "down"
+                    game_p2.state = "down"
                 if event.key == pygame.K_UP:
-                    player_1.state = "up"
+                    game_p1.state = "up"
                 if event.key == pygame.K_DOWN:
-                    player_1.state = "down"
+                    game_p1.state = "down"
             if event.type == pygame.KEYUP:
-                player_1.state = "idle"
-                player_2.state = "idle"
+                game_p1.state = "idle"
+                game_p2.state = "idle"
 
         create_screen()
 
@@ -140,23 +142,25 @@ def game_play_loop(screen, p1_paddle, p2_paddle, ball, titles, score):
         game_ball.bounce()
         game_ball.move()
         
-        player_1.draw()
-        player_1.move()
+        game_p1.draw()
+        game_p1.move()
 
-        player_2.draw()
-        player_2.move()
+        game_p2.draw()
+        game_p2.move()
 
         game_score.draw()
         game_score.score()
 
-        flags.game_over = game_titles.win()
+        flags.game_over = True
         flags.playing = not game_titles.win()
     
         pygame.display.flip()
         clock.tick(120)
 
 def game_over_loop(titles):
-    game_titles = titles
+
+    over_titles = titles
+    
     while flags.game_over:
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -167,7 +171,7 @@ def game_over_loop(titles):
                         sys.exit()
                     if event.key == pygame.K_SPACE:
                         create_screen()
-                        game_titles.intro()
+                        over_titles.intro()
                         flags.setup_mode = True
                         flags.game_over = False
 
@@ -175,56 +179,46 @@ def game_over_loop(titles):
         pygame.display.flip()
         clock.tick(120)
 
-def reset_game(p1_paddle, p2_paddle, ball, titles, score):
+def main_loop(screen, p1_paddle, p2_paddle, ai_paddle, ball, titles, score):
+    
+    main_screen = screen
+    main_p1 = p1_paddle
+    main_p2= p2_paddle
+    ai_p2 = ai_paddle
+    main_ball = ball
+    main_titles = titles
+    main_score = score
 
-    flags.playing = False
-    flags.multiplayer = False
-    flags.game_over = False
-    flags.difficulty = None
-    p1_paddle.score = 0
-    p2_paddle.score = 0
-
-    del ball
-    ball = components.Ball(
-        screen,
-        config.white,
-        config.width // 2,
-        config.height // 2,
-        config.line_weight * 2,
-        )
-
-    del p1_paddle
-    p1_paddle = components.Paddle(
-        screen,
-        config.blue,
-        (config.width - 20),
-        (config.height // 2 - 10 * config.line_weight),
-        2 * config.line_weight,
-        20 * config.line_weight,
-        ball
-    )
-
-    del p2_paddle
-    p2_paddle = components.Paddle(
-        screen,
-        config.red,
-        10,
-        (config.height // 2 - 10 * config.line_weight),
-        2 * config.line_weight,
-        20 * config.line_weight,
-        ball
-    )     
-    del titles
-    titles = components.Titles(screen, p1_paddle, p2_paddle)
-
-    del score
-    score = components.ScoreBoard(screen, p1_paddle, p2_paddle, ball)
-
-def main_loop():
     while flags.running:  
-        game_setup_loop(titles)
-        game_play_loop(screen, p1_paddle, p2_paddle, ball, titles, score)
-        game_over_loop(titles)
-        reset_game(p1_paddle, p2_paddle, ball, titles, score)
+        game_setup_loop(main_titles)
+        game_play_loop(main_screen, main_p1, main_p2, ai_p2, main_ball, main_titles, main_score)
+        game_over_loop(main_titles)
 
-main_loop()
+
+        flags.playing = False
+        flags.multiplayer = False
+        flags.game_over = False
+        flags.difficulty = None
+        main_p1.score = 0
+        main_p2.score = 0
+
+    del main_screen
+    main_screen = screen
+
+    del main_p1
+    main_p1 = p1_paddle
+
+    del main_p2
+    main_p2 = p2_paddle
+
+    del main_ball
+    main_ball = ball
+    
+    del main_titles
+    main_titles = titles
+
+    del main_score
+    main_score = score
+
+
+main_loop(screen, p1_paddle, p2_paddle, ai_paddle, ball, titles, score)
