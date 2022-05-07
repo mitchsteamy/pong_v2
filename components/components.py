@@ -1,5 +1,5 @@
 import pygame
-from .config import config
+from .config import config,flags
 
 # TODO create play again feature
 
@@ -114,11 +114,11 @@ class AiPaddleController(Paddle):
 
 
 class ScoreBoard:
-    def __init__(self, screen, paddle_1, paddle_2, ball):
+    def __init__(self, screen, player_1, player_2, ball):
         self.game_font = pygame.font.SysFont("Ubuntu", 50)
         self.screen = screen
-        self.p1_paddle = paddle_1
-        self.p2_paddle = paddle_2
+        self.paddle_1 = player_1
+        self.paddle_2 = player_2
         self.ball = ball
 
     def draw(self):
@@ -132,31 +132,31 @@ class ScoreBoard:
 
         # draw score board
         self.score_1 = self.game_font.render(
-            f"{str(self.p1_paddle.score)}", False, config.blue
+            f"{str(self.paddle_1.score)}", False, config.blue
         )
         self.score_2 = self.game_font.render(
-            f"{str(self.p2_paddle.score)}", False, config.red
+            f"{str(self.paddle_2.score)}", False, config.red
         )
         self.screen.blit(self.score_2, ((config.width // 2) - 60, config.height // 20))
         self.screen.blit(self.score_1, ((config.width // 2) + 28, config.height // 20))
 
     def score(self):
-        if (self.ball.x_pos + self.ball.x_vel < self.p2_paddle.x_pos + self.p2_paddle.width) and (self.p2_paddle.y_pos + self.p2_paddle.speed < self.ball.y_pos + self.ball.y_vel < self.p2_paddle.y_pos + self.p2_paddle.height + self.p2_paddle.speed):
+        if (self.ball.x_pos + self.ball.x_vel < self.paddle_2.x_pos + self.paddle_2.width) and (self.paddle_2.y_pos + self.paddle_2.speed < self.ball.y_pos + self.ball.y_vel < self.paddle_2.y_pos + self.paddle_2.height + self.paddle_2.speed):
             self.ball.x_vel = -self.ball.x_vel
-            self.ball.y_vel = (self.p2_paddle.y_pos + self.p2_paddle.height / 2 - self.ball.y_pos )/15 #test
+            self.ball.y_vel = (self.paddle_2.y_pos + self.paddle_2.height / 2 - self.ball.y_pos )/ 10 #test
             self.ball.y_vel = -self.ball.y_vel
         elif self.ball.x_pos + self.ball.x_vel < 0:
-            self.p1_paddle.score += 1
+            self.paddle_1.score += 1
             self.ball.x_pos = config.width / 2
             self.ball.y_pos = config.height / 2
             self.ball.x_vel = self.ball.x_vel
             self.ball.y_vel = 0
-        if (self.ball.x_pos + self.ball.x_vel > self.p1_paddle.x_pos) and (self.p1_paddle.y_pos + self.p1_paddle.speed < self.ball.y_pos + self.ball.y_vel  < self.p1_paddle.y_pos + self.p1_paddle.height + self.p1_paddle.speed):
+        if (self.ball.x_pos + self.ball.x_vel > self.paddle_1.x_pos) and (self.paddle_1.y_pos + self.paddle_1.speed < self.ball.y_pos + self.ball.y_vel  < self.paddle_1.y_pos + self.paddle_1.height + self.paddle_1.speed):
             self.ball.x_vel = -self.ball.x_vel
-            self.ball.y_vel = (self.p1_paddle.y_pos + self.p1_paddle.height / 2 - self.ball.y_pos )/ 15 #test
+            self.ball.y_vel = (self.paddle_1.y_pos + self.paddle_1.height / 2 - self.ball.y_pos )/ 10 #test
             self.ball.y_vel = -self.ball.y_vel
         elif self.ball.x_pos + self.ball.x_vel > config.width:
-            self.p2_paddle.score += 1
+            self.paddle_2.score += 1
             self.ball.x_pos = config.width / 2
             self.ball.y_pos = config.height / 2
             self.ball.x_vel = - self.ball.x_vel
@@ -208,7 +208,7 @@ class Titles:
         )
         self.screen.blit(self.intro_text, (config.width // 25, config.height // 2 - 70))
     
-    def difficulty(self):
+    def input_difficulty(self):
         self.screen.fill(config.black)
         self.difficulty_text = self.game_font_med.render(
             f"Press 1 for Easy, 2 for Medium, or 3 for Hard.", False, config.white
