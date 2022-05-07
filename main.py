@@ -1,236 +1,258 @@
 import pygame
-import sys
-import components.components as components
-from components.config import config, flags
+from .config import config,flags
+
+# TODO create play again feature
+
+class Ball:
+    def __init__(self, screen, color, x_pos, y_pos, rad):
+        self.screen = screen
+        self.color = color
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.x_vel = 5
+        self.y_vel = 0
+        self.rad = rad
+
+    def draw(self):
+        pygame.draw.circle(self.screen, self.color, (self.x_pos, self.y_pos), self.rad)
+
+    def move(self):
+        self.x_pos += self.x_vel
+        self.y_pos += self.y_vel
+
+    def bounce(self):
+        if self.y_pos + self.y_vel > config.height or self.y_pos + self.y_vel < 0:
+            self.y_vel = -self.y_vel
+
+    def set_x_vel(self, new_x_vel: int):
+        self.x_vel = new_x_vel
+    
+    def set_difficulty(self, difficulty):
+        self.difficulty = difficulty
+        if difficulty == "easy":
+            self.set_x_vel(4)
+        elif difficulty == "hard":
+            self.set_x_vel(7)
+        else:
+            self.set_x_vel(5)
 
 
-# pygame instance
-pygame.init()
-pygame.display.set_caption("PONG by Mitch Embry")
 
-#create game clock
-clock = pygame.time.Clock()
+class Paddle:
+    def __init__(self, screen, color, x_pos, y_pos, width, height, ball):
+        self.screen = screen
+        self.color = color
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.width = width
+        self.height = height
+        self.ball = ball
+        self.speed = - 5
+        self.score = 0
+        self.state = "idle"
+        self.difficulty = "medium"
 
-# create screen
-screen = pygame.display.set_mode((config.width, config.height))
-
-
-# Instatiation of objects
-ball = components.Ball(
-    screen,
-    config.white,
-    config.width // 2,
-    config.height // 2,
-    config.line_weight * 2,
-)
-
-p1_paddle = components.Paddle(
-    screen,
-    config.blue,
-    (config.width - 20),
-    (config.height // 2 - 10 * config.line_weight),
-    2 * config.line_weight,
-    20 * config.line_weight,
-    ball
-)
-
-p2_paddle = components.Paddle(
-    screen,
-    config.red,
-    10,
-    (config.height // 2 - 10 * config.line_weight),
-    2 * config.line_weight,
-    20 * config.line_weight,
-    ball
-)
-
-score = components.ScoreBoard(screen, p1_paddle, p2_paddle, ball)
-titles = components.Titles(screen, p1_paddle, p2_paddle)
-
-def create_screen():
-    screen.fill(config.black)
-
-create_screen()
-
-
-def reset_game(p1_paddle, p2_paddle, ball, titles, score):
-    player_1 = p1_paddle
-    player_2 = p2_paddle
-    game_ball = ball
-    game_score = score
-    game_titles = titles
-
-
-    flags.playing = False
-    flags.multiplayer = False
-    flags.game_over = False
-    flags.difficulty = None
-    player_1.score = 0
-    player_2.score = 0
-
-    del game_ball
-    game_ball = components.Ball(
-        screen,
-        config.white,
-        config.width // 2,
-        config.height // 2,
-        config.line_weight * 2,
+    def draw(self):
+        pygame.draw.rect(
+            self.screen, self.color, (self.x_pos, self.y_pos, self.width, self.height)
         )
 
-    del player_1
-    player_1 = components.Paddle(
-        screen,
-        config.blue,
-        (config.width - 20),
-        (config.height // 2 - 10 * config.line_weight),
-        2 * config.line_weight,
-        20 * config.line_weight,
-        ball
-    )
+    def move(self):
+        if self.state == "up":
+            self.y_pos += self.speed
+        elif self.state == "down":
+            self.y_pos += -self.speed
+        if self.y_pos <= 0:
+            self.y_pos = 0
+        if self.y_pos >= config.height - self.height:
+            self.y_pos = config.height - self.height
 
-    del player_2
-    player_2 = components.Paddle(
-        screen,
-        config.red,
-        10,
-        (config.height // 2 - 10 * config.line_weight),
-        2 * config.line_weight,
-        20 * config.line_weight,
-        ball
-    ) 
-    del game_score
-    game_score = components.ScoreBoard(screen, p1_paddle, p2_paddle, ball)
+
+    def set_speed(self, speed: int):
+        self.speed = speed
+
+    def set_difficulty(self, difficulty):
+        self.difficulty = difficulty
+        if difficulty == "easy":
+            self.set_speed(-3)
+        elif difficulty == "hard":
+            self.set_speed(-6)
+        else:
+            self.set_speed(-4)
     
-    del game_titles
-    game_titles = components.Titles(screen, p1_paddle, p2_paddle)
 
-# game setup
-def game_setup_loop(titles):
-    game_titles = titles
 
-    game_titles.intro()
-    while flags.setup_mode:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    sys.exit()
-                if event.key == pygame.K_m:
-                    flags.multiplayer = True
-                    game_titles.difficulty()
-                if event.key == pygame.K_RETURN:
-                    flags.multiplayer = False
-                    game_titles.difficulty()
-                if event.key == pygame.K_1:
-                    flags.difficulty = "easy"
-                    flags.playing = True
-                    flags.setup_mode = False
-                if event.key == pygame.K_2:
-                    flags.difficulty = 'medium'
-                    flags.playing = True
-                    flags.setup_mode = False
-                if event.key == pygame.K_3:
-                    flags.difficulty = "hard"
-                    flags.playing = True
-                    flags.setup_mode = False
-                       
-        pygame.display.flip()
-        clock.tick(120)
 
-def game_play_loop(screen, p1_paddle, p2_paddle, ball, titles, score):
-    game_screen = screen
-    player_1 = p1_paddle
-    player_2 = p2_paddle
-    game_ball = ball
-    game_titles = titles
-    game_score = score
-
-    if not flags.multiplayer:
-        player_2 = components.AiPaddleController(player_2)
-        player_2.set_difficulty(flags.difficulty)
+class AiPaddleController(Paddle):
+    def __init__(self, paddle):
+        self.paddle = paddle
+        super().__init__(paddle.screen, paddle.color, paddle.x_pos, paddle.y_pos, paddle.width, paddle.height, paddle.ball)
     
-    else:
-        player_2 = player_2
+    def draw(self):
+        pygame.draw.rect(
+            self.screen, self.paddle.color, (self.paddle.x_pos, self.paddle.y_pos, self.paddle.width, self.paddle.height)
+        )
 
-    # set ball difficulty
- 
-    game_ball.set_difficulty(flags.difficulty)
+    def move(self):
+        if (
+            self.paddle.y_pos + self.paddle.height - 10 < self.ball.y_pos
+            and self.ball.x_vel < 0
+            and self.ball.x_pos < config.width // 2
+        ):
+            self.paddle.y_pos -= self.speed
+        elif (
+            self.paddle.y_pos > self.ball.y_pos
+            and self.ball.x_vel < 0
+            and self.ball.x_pos < config.width // 2
+        ):
+            self.paddle.y_pos += self.speed
 
-    # create scoreboard
-    del game_score
-    game_score = components.ScoreBoard(game_screen, player_1, player_2, game_ball)
-    del game_titles
-    game_titles = components.Titles(game_screen, player_1, player_2)
-    
-    while flags.playing:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    sys.exit()
-                if event.key == pygame.K_w:
-                    player_2.state = "up"
-                if event.key == pygame.K_s:
-                    player_2.state = "down"
-                if event.key == pygame.K_UP:
-                    player_1.state = "up"
-                if event.key == pygame.K_DOWN:
-                    player_1.state = "down"
-            if event.type == pygame.KEYUP:
-                player_1.state = "idle"
-                player_2.state = "idle"
+        if self.paddle.y_pos <= 0:
+            self.paddle.y_pos = 0
+        if self.paddle.y_pos >= config.height - self.paddle.height:
+            self.paddle.y_pos = config.height - self.paddle.height
 
-        create_screen()
 
-        game_ball.draw()
-        game_ball.bounce()
-        game_ball.move()
+class ScoreBoard:
+    def __init__(self, screen, player_1, player_2, ball):
+        self.game_font = pygame.font.SysFont("Ubuntu", 50)
+        self.screen = screen
+        self.paddle_1 = player_1
+        self.paddle_2 = player_2
+        self.ball = ball
+
+    def draw(self):
+        pygame.draw.line(
+            self.screen,
+            config.white,
+            (config.width // 2, 0),
+            (config.width // 2, config.height),
+            2,
+        )
+
+        # draw score board
+        self.score_1 = self.game_font.render(
+            f"{str(self.paddle_1.score)}", False, config.blue
+        )
+        self.score_2 = self.game_font.render(
+            f"{str(self.paddle_2.score)}", False, config.red
+        )
+        self.screen.blit(self.score_2, ((config.width // 2) - 60, config.height // 20))
+        self.screen.blit(self.score_1, ((config.width // 2) + 28, config.height // 20))
+
+    def score(self):
+        if (self.ball.x_pos + self.ball.x_vel < self.paddle_2.x_pos + self.paddle_2.width) and (self.paddle_2.y_pos + self.paddle_2.speed < self.ball.y_pos + self.ball.y_vel < self.paddle_2.y_pos + self.paddle_2.height + self.paddle_2.speed):
+            self.ball.x_vel = -self.ball.x_vel
+            self.ball.y_vel = (self.paddle_2.y_pos + self.paddle_2.height / 2 - self.ball.y_pos )/ 10 #test
+            self.ball.y_vel = -self.ball.y_vel
+        elif self.ball.x_pos + self.ball.x_vel < 0:
+            self.paddle_1.score += 1
+            self.ball.x_pos = config.width / 2
+            self.ball.y_pos = config.height / 2
+            self.ball.x_vel = self.ball.x_vel
+            self.ball.y_vel = 0
+        if (self.ball.x_pos + self.ball.x_vel > self.paddle_1.x_pos) and (self.paddle_1.y_pos + self.paddle_1.speed < self.ball.y_pos + self.ball.y_vel  < self.paddle_1.y_pos + self.paddle_1.height + self.paddle_1.speed):
+            self.ball.x_vel = -self.ball.x_vel
+            self.ball.y_vel = (self.paddle_1.y_pos + self.paddle_1.height / 2 - self.ball.y_pos )/ 10 #test
+            self.ball.y_vel = -self.ball.y_vel
+        elif self.ball.x_pos + self.ball.x_vel > config.width:
+            self.paddle_2.score += 1
+            self.ball.x_pos = config.width / 2
+            self.ball.y_pos = config.height / 2
+            self.ball.x_vel = - self.ball.x_vel
+            self.ball.y_vel = 0
         
-        player_1.draw()
-        player_1.move()
 
-        player_2.draw()
-        player_2.move()
+class GameSetup:
+    def __init__(self, screen):
+        self.screen = screen
+        self.game_font = pygame.font.SysFont("Ubuntu", 40)
+        self.game_font_med = pygame.font.SysFont("Ubuntu", 30)
+        self.game_font_small = pygame.font.SysFont("Ubuntu", 20)
 
-        game_score.draw()
-        game_score.score()
+    def instructions(self):
+        self.screen.fill(config.black)
+        self.instruction_1 = self.game_font_med.render(
+            f"Player 1 use Up & Dowm keys. Player 2 use W & S Keys.",
+            False,
+            config.white,
+        )
+        self.instruction_2 = self.game_font_small.render(
+            f"Press Space bar to begin Playing", False, config.white
+        )
+        self.screen.blit(
+            self.instruction_1, (config.width // 15, config.height // 2 - 70)
+        )
+        self.screen.blit(
+            self.instruction_2, (config.width // 3, config.height // 2 - 20)
+        )
 
-        flags.game_over = game_titles.win()
-        flags.playing = not game_titles.win()
+
+class Titles:
+    def __init__(self, screen, paddle_1, paddle_2):
+        self.screen = screen
+        self.game_font = pygame.font.SysFont("Ubuntu", 40)
+        self.game_font_med = pygame.font.SysFont("Ubuntu", 30)
+        self.game_font_small = pygame.font.SysFont("Ubuntu", 20)
+        self.paddle_1 = paddle_1
+        self.paddle_2 = paddle_2
+
+        self.intro()
+
+    def intro(self):
+        self.screen.fill(config.black)
+        self.intro_text = self.game_font_med.render(
+            f"Press M for Multiplayer Mode. Press ENTER for Singleplayer.",
+            False,
+            config.white,
+        )
+        self.screen.blit(self.intro_text, (config.width // 25, config.height // 2 - 70))
     
-        pygame.display.flip()
-        clock.tick(120)
+    def input_difficulty(self):
+        self.screen.fill(config.black)
+        self.difficulty_text = self.game_font_med.render(
+            f"Press 1 for Easy, 2 for Medium, or 3 for Hard.", False, config.white
+        )
+        self.screen.blit(self.difficulty_text, (config.width // 7, config.height // 2 - 70))
 
-def game_over_loop(titles):
-    game_titles = titles
-    while flags.game_over:
-        for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        sys.exit()
-                    if event.key == pygame.K_SPACE:
-                        create_screen()
-                        game_titles.intro()
-                        flags.setup_mode = True
-                        flags.game_over = False
+    def win(self):
+        self.p1_win = self.game_font.render(
+            f"Player 1 is the winner.", False, config.blue
+        )
+        self.p2_win = self.game_font.render(
+            f"Player 2 is the winner.", False, config.red
+        )
+        self.play_again = self.game_font_small.render(
+            f"                    Press the space bar to play again",
+            False,
+            config.white,
+        )
+        
+        if self.paddle_1.score >= 3:
+            game_over = True
+            
+            self.screen.fill(config.black)
+            self.screen.blit(self.p1_win, (config.width // 4, config.height // 2 - 85))
+            self.screen.blit(self.play_again, (config.width // 6, config.height // 2 - 40))
+            
+            self.paddle_1.y_pos = config.height // 2 - self.paddle_1.height // 2
+            self.paddle_2.y_pos = config.height // 2 - self.paddle_2.height // 2
+            
+            return game_over
 
+        elif self.paddle_2.score >= 3:
+            game_over = True
 
-        pygame.display.flip()
-        clock.tick(120)
+            self.screen.fill(config.black)
+            self.screen.blit(self.p2_win, (config.width // 4, config.height // 2 - 85))
+            self.screen.blit(self.play_again, (config.width // 6, config.height // 2 - 40))
 
+            self.paddle_1.y_pos = config.height // 2 - self.paddle_1.height // 2
+            self.paddle_2.y_pos = config.height // 2 - self.paddle_2.height // 2
+            
+            return game_over
 
-def main_loop():
-    while flags.running:  
-        game_setup_loop(titles)
-        game_play_loop(screen, p1_paddle, p2_paddle, ball, titles, score)
-        game_over_loop(titles)
-        reset_game(p1_paddle, p2_paddle, ball, titles, score)
+        else:
 
-main_loop()
+            game_over = False
+            return game_over
