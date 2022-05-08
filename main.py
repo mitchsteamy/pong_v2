@@ -3,7 +3,6 @@ import sys
 import components.components as components
 from components.config import config, flags
 
-
 # pygame instance
 pygame.init()
 pygame.display.set_caption("PONG by Mitch Embry")
@@ -13,7 +12,6 @@ clock = pygame.time.Clock()
 
 # create screen
 screen = pygame.display.set_mode((config.width, config.height))
-
 
 # Instatiation of objects
 ball = components.Ball(
@@ -106,7 +104,6 @@ def game_play_loop(p1_paddle, p2_paddle, ai_paddle, ball, titles, score):
         game_p2 = p2_paddle
 
     # set ball difficulty
- 
     game_ball.set_difficulty(flags.difficulty)
 
     #reset titles
@@ -174,7 +171,6 @@ def game_over_loop(titles):
                         flags.setup_mode = True
                         flags.game_over = False
 
-
         pygame.display.flip()
         clock.tick(120)
 
@@ -192,7 +188,6 @@ def main_loop(screen, p1_paddle, p2_paddle, ai_paddle, ball, titles, score):
         game_setup_loop(main_titles)
         game_play_loop (main_p1, main_p2, ai_p2, main_ball, main_titles, main_score)
         game_over_loop(main_titles)
-
 
         flags.playing = False
         flags.multiplayer = False
