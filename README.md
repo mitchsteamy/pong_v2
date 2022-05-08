@@ -1,6 +1,6 @@
 Code after speding some time rewriting stuff based on feedback given during google hangouts call.
 
-# TODO paddle drop problem
+# TODO fix paddle drop bug
 
 # Pong
 I created a Pong terminal game using python 3 as a project for codecademy.
