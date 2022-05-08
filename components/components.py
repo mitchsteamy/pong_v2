@@ -1,8 +1,6 @@
 import pygame
 from .config import config,flags
 
-# TODO create play again feature
-
 class Ball:
     def __init__(self, screen, color, x_pos, y_pos, rad):
         self.screen = screen
@@ -35,7 +33,6 @@ class Ball:
             self.set_x_vel(7)
         else:
             self.set_x_vel(5)
-
 
 
 class Paddle:
@@ -80,9 +77,7 @@ class Paddle:
         else:
             self.set_speed(-4)
     
-
-
-
+    
 class AiPaddleController(Paddle):
     def __init__(self, paddle):
         self.paddle = paddle
@@ -251,9 +246,8 @@ class Titles:
             self.paddle_2.y_pos = config.height // 2 - self.paddle_2.height // 2
             
             return game_over
-
+        
         else:
-
             game_over = False
             return game_over
 
