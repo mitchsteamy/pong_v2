@@ -47,6 +47,7 @@ p2_paddle = components.Paddle(
 ai_paddle = components.AiPaddleController(p2_paddle)
 
 score = components.ScoreBoard(screen, p1_paddle, p2_paddle, ball)
+
 titles = components.Titles(screen, p1_paddle, p2_paddle)
 
 def create_screen():
@@ -90,10 +91,8 @@ def game_setup_loop(titles):
         pygame.display.flip()
         clock.tick(120)
 
+def game_play_loop(p1_paddle, p2_paddle, ai_paddle, ball, titles, score):
 
-def game_play_loop(screen, p1_paddle, p2_paddle, ai_paddle, ball, titles, score):
-
-    game_screen = screen
     game_p1 = p1_paddle
     game_ball = ball
     game_titles = titles
@@ -191,7 +190,7 @@ def main_loop(screen, p1_paddle, p2_paddle, ai_paddle, ball, titles, score):
 
     while flags.running:  
         game_setup_loop(main_titles)
-        game_play_loop(main_screen, main_p1, main_p2, ai_p2, main_ball, main_titles, main_score)
+        game_play_loop (main_p1, main_p2, ai_p2, main_ball, main_titles, main_score)
         game_over_loop(main_titles)
 
 
@@ -219,6 +218,5 @@ def main_loop(screen, p1_paddle, p2_paddle, ai_paddle, ball, titles, score):
 
     del main_score
     main_score = score
-
 
 main_loop(screen, p1_paddle, p2_paddle, ai_paddle, ball, titles, score)
