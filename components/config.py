@@ -21,6 +21,7 @@ config = PongConfig(
     line_weight = 5,
 )
 
+
 @dataclass
 class PongFlags:
     running: bool
