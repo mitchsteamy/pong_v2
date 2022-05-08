@@ -1,5 +1,5 @@
 import pygame
-from .config import config,flags
+from .config import config
 
 class Ball:
     def __init__(self, screen, color, x_pos, y_pos, rad):
