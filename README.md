@@ -1,4 +1,5 @@
 Code after speding some time rewriting stuff based on feedback given during google hangouts call.
+Convereted origional game to an object based game using python 3 classes.
 
 # TODO fix paddle drop bug
 # TODO fix paddle sticking bug
